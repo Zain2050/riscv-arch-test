@@ -24,7 +24,7 @@ RVTEST_SIGBASE( x13,signature_x13_1)
 	// Instruction at 0xffffffff is not possible as umcompressed instructions are multiples of 4
 	// Access the last four bytes (0xfffffffc) which contain the jr instruction
 	addi t0, a5, -3															// (0xffffffff - 0x3) = 0xfffffffc
-    jalr ra, t0, 0
+	jalr ra, t0, 0
 	SREG a2, 0(s11)
 	nop
 	addi s11, s11, REGWIDTH
