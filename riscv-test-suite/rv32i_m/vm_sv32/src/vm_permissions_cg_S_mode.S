@@ -5,14 +5,14 @@
 //		Then, in S-Mode, the page is accessed --> required: No fault
 // 2. U bit is UnSet for the page at level 1 with R Permissions (Execute only page):
 //		Then, in S-Mode, the page is accessed --> required: Fetch-page-fault, Store-page-fault
-// 5. U bit is UnSet for the page at level 1 with X Permissions (execute page):
+// 3. U bit is UnSet for the page at level 1 with X Permissions (execute page):
 //		Then, in S-Mode, the page is accessed --> required: Load-page-fault, Store-page-fault
 
-// 6. U bit is UnSet for the page at level 0 with RWX Permissions (Read, write, execute page):
+// 4. U bit is UnSet for the page at level 0 with RWX Permissions (Read, write, execute page):
 //		Then, in S-Mode, the page is accessed --> required: No fault
-// 7. U bit is UnSet for the page at level 0 with R Permissions (Execute only page):
+// 5. U bit is UnSet for the page at level 0 with R Permissions (Execute only page):
 //		Then, in S-Mode, the page is accessed --> required: Fetch-page-fault, Store-page-fault
-// 10. U bit is UnSet for the page at level 0 with X Permissions (execute page):
+// 6. U bit is UnSet for the page at level 0 with X Permissions (execute page):
 //		Then, in S-Mode, the page is accessed --> required: Load-page-fault, Store-page-fault
 //-------------------------------------------------------------------------------------------------------------------
 
@@ -186,7 +186,7 @@ main:
 	TEST_CASES_RUNNER Smode, va_data, LEVEL1
 
 //---------------------------------------------------------------------------------------------------------------------------------
-//					4MB PAGE	Region 5 under test at level 1 -- R permissions given to the region
+//					4MB PAGE	Region 2 under test at level 1 -- R permissions given to the region
 //---------------------------------------------------------------------------------------------------------------------------------
 	// Test case 2: U bit unset | Test in S-Mode |  X bit set | expected = fetch-page-fault, store-page-fault
 	PTE_SETUP_RV32_New(rvtest_data_1_l1, (PTE_D | PTE_A | PTE_R | PTE_V), va_data, LEVEL1)
@@ -198,7 +198,7 @@ main:
 	TEST_CASES_RUNNER Smode, va_data, LEVEL1
 
 //---------------------------------------------------------------------------------------------------------------------------------
-//					4MB PAGE	Region 2 under test at level 1 -- X permissions given to the region
+//					4MB PAGE	Region 3 under test at level 1 -- X permissions given to the region
 //---------------------------------------------------------------------------------------------------------------------------------
 	// Test case 3: U bit unset | Test in S-Mode | X bit set | expected = Load, Store Fault
 	PTE_SETUP_RV32_New(rvtest_data_1_l1, (PTE_D | PTE_A | PTE_X | PTE_V), va_data, LEVEL1)
@@ -214,7 +214,7 @@ main:
 //---------------------------------------------------------------------------------------------------------------------------------
 //													TESTS AT LEVEL 0
 //---------------------------------------------------------------------------------------------------------------------------------
-//					4KB PAGE	Region 1 under test at level 0 -- RWX permissions given to the region
+//					4KB PAGE	Region 4 under test at level 0 -- RWX permissions given to the region
 //---------------------------------------------------------------------------------------------------------------------------------
 	// Test case 4: U bit unset | Test in S-Mode | RWX bit set | expected = No RWX fault 
 	PTE_SETUP_RV32_New(rvtest_slvl1_pg_tbl, (PTE_V), va_data, LEVEL1)
@@ -242,7 +242,7 @@ main:
 	TEST_CASES_RUNNER Smode, va_data, LEVEL0
 
 //---------------------------------------------------------------------------------------------------------------------------------
-//					4KB PAGE	Region 2 under test at level 0 -- X permissions given to the region
+//					4KB PAGE	Region 6 under test at level 0 -- X permissions given to the region
 //---------------------------------------------------------------------------------------------------------------------------------
 	// Test case 6: U bit unset | Test in S-Mode | X bit set | expected = Load, Store Fault
 	PTE_SETUP_RV32_New(rvtest_slvl1_pg_tbl, (PTE_V), va_data, LEVEL1)
