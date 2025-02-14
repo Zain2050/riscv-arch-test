@@ -1,3 +1,18 @@
+// ----------------------------------------------------------------------------------------------------------------------
+// This test is part of the test plan for the SV-39-based Virtual Memory System, available at:
+// https://docs.google.com/spreadsheets/d/1rZQbz8gJc3RRbTG4rbw9SoEGYkArA8ileVldBX_gxUc/edit?gid=1688601426#gid=1688601426
+// Developed by: Muhammad Abdullah, Muhammad Zain, Muhammad Ahmad, Hamza Ali
+// ----------------------------------------------------------------------------------------------------------------------
+// This test verifies the functionality of satp register in M, S and U Mode using csrrw, csrrs, csrrc.
+// Test cases are as follows:
+// ----------------------------------------------------------------------------------------------------------------------
+//	1. satp register accessed in M, S Mode -> Successful
+//	2. satp register accessed in U Mode -> Illegal Instruction exception
+//	3. Walking ones on the PPN of satp -> Successful
+// Total Expected Faults: 3
+// ----------------------------------------------------------------------------------------------------------------------
+
+
 // #define SKIP_MEPC
 // #define SKIP_MTVAL
 
