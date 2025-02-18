@@ -73,10 +73,12 @@ RVTEST_SIGBASE( x13,signature_x13_1)
 
 	// Check store on the address.
 	sw	a2, 20(a5)
+	nop
 	SREG a2, 0(s11)
 	nop
 	addi s11, s11, REGWIDTH
 
+	sfence.vma
 	lw	a4, 20(a5)															// Reload for verification (CHECK IF DATA HAS BEEN UPDATED SUCCESSFULLY)
 	SREG a4, 0(s11)
 	nop
