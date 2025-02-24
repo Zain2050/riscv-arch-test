@@ -1,16 +1,8 @@
-// ----------------------------------------------------------------------------------------------------------------------
-// This test is part of the test plan for the SV-32-based Virtual Memory System, available at:
-// https://docs.google.com/spreadsheets/d/1Y8fEu2PnT69w-h8hZc2QQSNKi7DBI0pbXHu2IB8soaQ/edit#gid=0
-// Developed by: Muhammad Hammad Bashir, Allen Baum, Umer Shahid
-// ----------------------------------------------------------------------------------------------------------------------
-// Copyright (c) 2020. RISC-V International. All rights reserved.
-// SPDX-License-Identifier: BSD-3-Clause
-// ----------------------------------------------------------------------------------------------------------------------
-// Test Explanation:
-// RISC-V Privileged Architecture ISA Manual -- Section 10.3
-// Note: This test is based on RISC-V Privileged ISA version 1.12, which does not include SVADE and SVADU support.
-// Future updates will align with ISA version 1.13.
-// 
+// This test is exactly same as the original test but with two modifications
+// nop has been added on line 67
+// sfence.vma has been added on line 72
+
+
 // Test cases are as follows:
 // ----------------------------------------------------------------------------------------------------------------------
 // -----------
@@ -73,10 +65,12 @@ RVTEST_SIGBASE( x13,signature_x13_1)
 
 	// Check store on the address.
 	sw	a2, 20(a5)
+	nop
 	SREG a2, 0(s11)
 	nop
 	addi s11, s11, REGWIDTH
 
+	sfence.vma
 	lw	a4, 20(a5)															// Reload for verification (CHECK IF DATA HAS BEEN UPDATED SUCCESSFULLY)
 	SREG a4, 0(s11)
 	nop
