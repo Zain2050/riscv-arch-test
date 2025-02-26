@@ -35,29 +35,42 @@ RVTEST_SIGBASE( x13,signature_x13_1)
 # ---------------------------------------------------------------------------------------------
 // Test the RWX permissions
 .macro VERIFICATION_RWX ADDRESS, level	
-   	LI(a5, \ADDRESS)														// Fetch the address to be checked
-	addi a2, a2, 16															// 16 stored in a2 for starting point
+   	LI(a5, \ADDRESS)                    // Load virtual address
+    addi a2, a2, 16                     // Test pattern initialization
 
-	// Check store on the address
-	sw	a2, 20(a5)
-	nop
+    // Test store permission
+    sw  a2, 20(a5)               		// Store test data
+    nop
 
-	// Check load from the address
-	lw	a4, 20(a5)															// Reload for verification (CHECK IF DATA HAS BEEN UPDATED SUCCESSFULLY)
-	nop
+    // Test load permission
+    lw  a4, 20(a5)        				// Load back data
+    nop
 
+   // Test Execute Permission
+   LI(x3, 0xACCE)						// Store a value which is to be checked in trap handler
+   LA(x4, 1f)							// Store the return Address in x4
+   jalr ra, a5, 0
+   nop
+   nop
+1:
+   nop
 .endm
 
 .macro TEST_CASES_RUNNER LOWER_MODE, VA, level
-	RVTEST_GOTO_LOWER_MODE	\LOWER_MODE		                                // Switching to S mode
+    	.if \LOWER_MODE == Mmode
+		SET_REQ_MSTATUS_VAL
+    	.else
+        	RVTEST_GOTO_LOWER_MODE \LOWER_MODE   // Switch to the specified lower mode
+    	.endif
 	.align 2
+
 	//JUMP TO LOAD, STORE, EXECUTE CHECK MACRO (SEE ON TOP)
 	VERIFICATION_RWX	\VA, \level
 	nop
 	nop
 
 	RVTEST_GOTO_MMODE		                                        		// Switching back to M mode
-
+	
 	// Signature Update
    	SREG a2, 0(x13)                     // Record store attempt
     	nop
@@ -66,7 +79,10 @@ RVTEST_SIGBASE( x13,signature_x13_1)
    	SREG a4, 0(x13)                     // Record load attempt
     	nop
     	addi x13, x13, REGWIDTH
+.endm
 
+.macro SET_REQ_MSTATUS_VAL
+	nop // Undefined so far, but can be used to update mstatus.SUM or mstatus.MPRV bit for different VM test cases
 .endm
 
 main:
@@ -86,15 +102,12 @@ main:
 //								Virtual addresses definition section for the code, data, sig, vmem, test sections
 //---------------------------------------------------------------------------------------------------------------------------------
 
-	// Test section VAs
+	// Virtual Address of Test section 
 	.set va_data,          		0x140000004                  // virtual address of rvtest_data_1_l2, rvtest_data_1_l1 and rvtest_data_1_l0
-	.set va_return_page_l2,     0x180000000                  // virtual address of return_page for the rvtest_data_1_l2
-	.set va_return_page_l1,     0x140200000                  // virtual address of return_page for the rvtest_data_1_l1
-	.set va_return_page_l0,     0x140001000					 // virtual address of return_page for the rvtest_data_1_l0
 
 	// Virtual Addresses for code & data regions
-	.set va_rvtest_code_begin,  0x0800003bc                  
-	.set va_rvtest_data_begin,  0x200000530			     
+	.set va_rvtest_code_begin,  0x1800003bc                  
+	.set va_rvtest_data_begin,  0x1c0000530		     
 
 
 //	PTE setup for Code Region
@@ -141,10 +154,6 @@ main:
 	PTE_SETUP_RV39_New(rvtest_data_1_l2, (PTE_D | PTE_A | PTE_X | PTE_W | PTE_R | PTE_V), va_data, LEVEL2)
 	sfence.vma
 
-	//return page PTE
-	PTE_SETUP_RV39_New(rvtest_data_1_l2, (PTE_D | PTE_A | PTE_X | PTE_W | PTE_R | PTE_V), va_return_page_l2, LEVEL2)
-	sfence.vma
-
 	TEST_CASES_RUNNER Smode, va_data, LEVEL2
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -159,11 +168,6 @@ main:
 	PTE_SETUP_RV39_New(rvtest_data_1_l1, (PTE_D | PTE_A | PTE_X | PTE_W | PTE_R | PTE_V), va_data, LEVEL1)
 	sfence.vma
 
-	//return page PTE
-	PTE_SETUP_RV39_New(rvtest_slvl2_pg_tbl, (PTE_V), va_return_page_l1, LEVEL2)
-	PTE_SETUP_RV39_New(rvtest_data_1_l1, (PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V), va_return_page_l1, LEVEL1)
-	sfence.vma
-
 	TEST_CASES_RUNNER Smode, va_data, LEVEL1
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -176,13 +180,7 @@ main:
 	// Test case 3: Test in S-Mode | RWX bit set | expected = successful page access 
 	PTE_SETUP_RV39_New(rvtest_slvl2_pg_tbl, (PTE_V), va_data, LEVEL2)
 	PTE_SETUP_RV39_New(rvtest_slvl1_pg_tbl, (PTE_V), va_data, LEVEL1)
-	PTE_SETUP_RV39_New(rvtest_data_1_l0, (PTE_D | PTE_A | PTE_G | PTE_X | PTE_W | PTE_R | PTE_V), va_data, LEVEL0)
-	sfence.vma
-
-	//return page PTE
-	PTE_SETUP_RV39_New(rvtest_slvl2_pg_tbl, (PTE_V), va_return_page_l2, LEVEL2)
-	PTE_SETUP_RV39_New(rvtest_slvl1_pg_tbl, (PTE_V), va_return_page_l1, LEVEL1)
-	PTE_SETUP_RV39_New(rvtest_data_1_l0, (PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V), va_return_page_l0, LEVEL0)
+	PTE_SETUP_RV39_New(rvtest_data_1_l0, (PTE_D | PTE_A | PTE_G | PTE_X | PTE_W | PTE_R | PTE_V | PTE_SOFT), va_data, LEVEL0)
 	sfence.vma
 
 	TEST_CASES_RUNNER Smode, va_data, LEVEL0
