@@ -180,7 +180,7 @@ main:
 	// Test case 3: Test in S-Mode | RWX bit set | expected = successful page access 
 	PTE_SETUP_RV39_New(rvtest_slvl2_pg_tbl, (PTE_V), va_data, LEVEL2)
 	PTE_SETUP_RV39_New(rvtest_slvl1_pg_tbl, (PTE_V), va_data, LEVEL1)
-	PTE_SETUP_RV39_New(rvtest_data_1_l0, (PTE_D | PTE_A | PTE_G | PTE_X | PTE_W | PTE_R | PTE_V | PTE_SOFT), va_data, LEVEL0)
+	PTE_SETUP_RV39_New(rvtest_data_1_l0, (PTE_D | PTE_A | PTE_X | PTE_W | PTE_R | PTE_V), va_data, LEVEL0)
 	sfence.vma
 
 	TEST_CASES_RUNNER Smode, va_data, LEVEL0
