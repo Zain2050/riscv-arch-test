@@ -87,7 +87,7 @@ main:
 //---------------------------------------------------------------------------------------------------------------------------------
 
 	// Test section VAs
-	.set va_data,          		0x140000000                  // virtual address of rvtest_data_1_l2, rvtest_data_1_l1 and rvtest_data_1_l0
+	.set va_data,          		0x140000004                  // virtual address of rvtest_data_1_l2, rvtest_data_1_l1 and rvtest_data_1_l0
 	.set va_return_page_l2,     0x180000000                  // virtual address of return_page for the rvtest_data_1_l2
 	.set va_return_page_l1,     0x140200000                  // virtual address of return_page for the rvtest_data_1_l1
 	.set va_return_page_l0,     0x140001000					 // virtual address of return_page for the rvtest_data_1_l0
@@ -138,7 +138,7 @@ main:
 //---------------------------------------------------------------------------------------------------------------------------------
 	
 	// Test case 1: Test in S-Mode | G bit set to 1 | expected = successful page access
-	PTE_SETUP_RV39_New(rvtest_data_1_l2, (PTE_D | PTE_A | PTE_G | PTE_X | PTE_W | PTE_R | PTE_V), va_data, LEVEL2)
+	PTE_SETUP_RV39_New(rvtest_data_1_l2, (PTE_D | PTE_A | PTE_X | PTE_W | PTE_R | PTE_V), va_data, LEVEL2)
 	sfence.vma
 
 	//return page PTE
@@ -149,29 +149,50 @@ main:
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------
-//													TESTS AT LEVEL 0
+//													TESTS AT LEVEL 1
 //---------------------------------------------------------------------------------------------------------------------------------
 //					2MB PAGE	Region 1 under test at level 1 -- RWX permissions given to the region
 //---------------------------------------------------------------------------------------------------------------------------------
 	
-	// Test case 2: Test in U-Mode | RWX bit set | expected = successful page access 
+	// Test case 2: Test in S-Mode | RWX bit set | expected = successful page access 
 	PTE_SETUP_RV39_New(rvtest_slvl2_pg_tbl, (PTE_V), va_data, LEVEL2)
 	PTE_SETUP_RV39_New(rvtest_data_1_l1, (PTE_D | PTE_A | PTE_X | PTE_W | PTE_R | PTE_V), va_data, LEVEL1)
 	sfence.vma
 
 	//return page PTE
-	PTE_SETUP_RV39_New(rvtest_slvl2_pg_tbl, (PTE_V), va_return_page_l1, LEVEL1)
+	PTE_SETUP_RV39_New(rvtest_slvl2_pg_tbl, (PTE_V), va_return_page_l1, LEVEL2)
 	PTE_SETUP_RV39_New(rvtest_data_1_l1, (PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V), va_return_page_l1, LEVEL1)
 	sfence.vma
 
 	TEST_CASES_RUNNER Smode, va_data, LEVEL1
+
+//---------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+//													TESTS AT LEVEL 0
+//---------------------------------------------------------------------------------------------------------------------------------
+//					2MB PAGE	Region 1 under test at level 0 -- RWX permissions given to the region
+//---------------------------------------------------------------------------------------------------------------------------------
+	
+	// Test case 3: Test in S-Mode | RWX bit set | expected = successful page access 
+	PTE_SETUP_RV39_New(rvtest_slvl2_pg_tbl, (PTE_V), va_data, LEVEL2)
+	PTE_SETUP_RV39_New(rvtest_slvl1_pg_tbl, (PTE_V), va_data, LEVEL1)
+	PTE_SETUP_RV39_New(rvtest_data_1_l0, (PTE_D | PTE_A | PTE_G | PTE_X | PTE_W | PTE_R | PTE_V), va_data, LEVEL0)
+	sfence.vma
+
+	//return page PTE
+	PTE_SETUP_RV39_New(rvtest_slvl2_pg_tbl, (PTE_V), va_return_page_l2, LEVEL2)
+	PTE_SETUP_RV39_New(rvtest_slvl1_pg_tbl, (PTE_V), va_return_page_l1, LEVEL1)
+	PTE_SETUP_RV39_New(rvtest_data_1_l0, (PTE_D | PTE_A | PTE_R | PTE_W | PTE_X | PTE_V), va_return_page_l0, LEVEL0)
+	sfence.vma
+
+	TEST_CASES_RUNNER Smode, va_data, LEVEL0
 
 #endif
 //---------------------------------------------------------------------------------------------------------------------------------
 RVTEST_CODE_END
 RVMODEL_HALT
 RVTEST_DATA_BEGIN
-.align 22
+.align 21
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //											PHYSICAL ADDRESS REGIONS FOR TESTING
@@ -186,6 +207,7 @@ rvtest_data_1_l1:
 	.word 0xbeefcaf2														// Random word
 	jr ra																	// return back if successful access
 
+.align 12
 //Physical Address region under testing for LEVEL 0
 rvtest_data_1_l0:
 	nop																		// trap return back skip
