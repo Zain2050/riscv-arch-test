@@ -218,10 +218,30 @@ Mend_PMP:                                    ;\
 #define SAVE_AREA_SETUP(VA, PA_LBL, _REG_NAME)                  ;\
 	LI (t0, VA)                                                 ;\
 	LA (t1, PA_LBL)                                             ;\
-	sub t0, t0, t1                                              ;\
+    srli t0, t0, 12                                             ;\
+    slli t0, t0, 12                                             ;\
+    LI (t2, 0xFFF)                                              ;\
+    and t2, t1, t2                                              ;\
+    or  t2, t0, t2                                              ;\
+	sub t0, t2, t1                                              ;\
 	LREG t1, _REG_NAME##_bgn_off+0*sv_area_sz(sp)               ;\
 	add t2, t1, t0                                              ;\
 	SREG t2, _REG_NAME##_bgn_off+1*sv_area_sz(sp)               ;\
+
+#define SAVE_AREA_SETUP_VS(VA, PA_LBL, _REG_NAME)               ;\
+	LI (t0, VA)                                                 ;\
+	LA (t1, PA_LBL)                                             ;\
+    srli t0, t0, 12                                             ;\
+    slli t0, t0, 12                                             ;\
+    LI (t2, 0xFFF)                                              ;\
+    and t2, t1, t2                                              ;\
+    or  t2, t0, t2                                              ;\
+	sub t0, t2, t1                                              ;\
+	LREG t1, _REG_NAME##_bgn_off+0*sv_area_sz(sp)               ;\
+	add t2, t1, t0                                              ;\
+    addi sp, sp, 2*sv_area_sz                                   ;\
+	SREG t2, _REG_NAME##_bgn_off+1*sv_area_sz(sp)               ;\
+    addi sp, sp, -2*sv_area_sz                                  ;\
 
 #define PTE_SETUP_SV32(_PAR, _PR, _TR0, _TR1, _VAR, level)  	  ;\
     .if (level==1)                                                ;\
