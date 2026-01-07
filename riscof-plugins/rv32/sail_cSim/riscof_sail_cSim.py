@@ -119,6 +119,7 @@ class sail_cSim(pluginTemplate):
         sail_config["base"]["xlen"] = int(self.xlen)
         sail_config["memory"]["pmp"]["grain"] = pmp_flags["pmp-grain"]
         sail_config["memory"]["pmp"]["count"] = pmp_flags["pmp-count"]
+        sail_config["base"]["mtval_has_illegal_instruction_bits"] = True
 
         # Enabling extensions that are disabled by default
         sail_config["extensions"]["Sv32"]["supported"] = True

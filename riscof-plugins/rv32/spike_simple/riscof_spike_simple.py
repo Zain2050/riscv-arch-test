@@ -153,6 +153,9 @@ class spike_simple(pluginTemplate):
       if "Zksed" in ispec["ISA"]:
           self.isa += '_Zksed'
 
+      # riscv-config currently lacks ISA-string validation for Zicclsm; enable it directly.
+      self.isa += '_Zicclsm'      # Enables misaligned memory accesses
+
       #TODO: The following assumes you are using the riscv-gcc toolchain. If
       #      not please change appropriately
       self.compile_cmd = self.compile_cmd+' -mabi='+('lp64 ' if 64 in ispec['supported_xlen'] else ('ilp32e ' if "E" in ispec["ISA"] else 'ilp32 '))
@@ -213,7 +216,7 @@ class spike_simple(pluginTemplate):
       # echo statement.
           if self.target_run:
             # set up the simulation command. Template is for spike. Please change.
-            simcmd = self.dut_exe + ' --misaligned --isa={0} +signature={1} +signature-granularity=4 {2}'.format(self.isa, sig_file, elf)
+            simcmd = self.dut_exe + ' --isa={0} +signature={1} +signature-granularity=4 {2}'.format(self.isa, sig_file, elf)
             simcmd = simcmd + ';' + self.dut_exe + ' --isa={0} --log-commits -l my.elf 2> {1}'.format(self.isa, log_file)
           else:
             simcmd = 'echo "NO RUN"'
