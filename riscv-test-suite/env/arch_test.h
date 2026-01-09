@@ -1527,7 +1527,7 @@ spcl_\__MODE__\()chk4ecall:
         jal   T2, \__MODE__\()test_failure      // T5(cause)/sp(ptr)/T2(rtnaddr)/T6(vector) are live, T1/T3/T4, are dead
         j  \__MODE__\()trapsig_ptr_upd:         // didn't end test, but miscompared, treat as normall ecall
 #endif
-.ifc \__MODE__ ,  M                           // if in mmode only, handle mprv
+.ifc \__MODE__ ,  M                             // If ecall is delegated, can't go to Mmode
 \__MODE__\()goto_mchk:                          // is ECALL, but not failure type; see if its goto_m_mode
         beqz    x3, \__MODE__\()rtn2mmode       // return in mmode if it is, else fall thru to normal trap signature
 .endif
@@ -1843,10 +1843,11 @@ data_adj_\__MODE__\()epc:
         bltu    T3, T2, cleanup_epilogs         // mepc < rvtest_code_begin (outside data seg), abort
 
 adj_\__MODE__\()epc:
-        sub     T2, T3, T2                      // Offset adjustment
+        sub     T3, T3, T2                      // Offset adjustment
 
 sv_\__MODE__\()epc:
-       TRAP_SIGUPD T2, 2                        // save 3rd sig value, (rel mepc) into trap sig area
+        TRAP_SIGUPD T3, 2                       // save 3rd sig value, (rel mepc) into trap sig area
+        csrr    T3, CSR_XEPC                    // As T3 was overwritten for TRAP_SIGUPD, read XEPC again
 
 #ifdef SKIP_MEPC                                //**** spcl case so fetch faults don't rtn to EPC+4
                                                 //**** checks if gp=spcl_value & cause=fetch-xx-fault
