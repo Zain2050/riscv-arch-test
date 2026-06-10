@@ -47,10 +47,12 @@ RVTEST_BEGIN
   \TEST_CASE\()_store:
   sw  a2, 20(a5)
   nop
+  nop
 
   // Test load permission
   \TEST_CASE\()_load:
   lw a3, 20(a5)
+  nop
   nop
 
   // Test execute permission
